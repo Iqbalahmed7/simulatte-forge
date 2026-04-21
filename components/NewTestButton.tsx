@@ -7,6 +7,7 @@ export default function NewTestButton() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
   const [form, setForm] = useState({
     name: '',
     category: '',
@@ -16,18 +17,23 @@ export default function NewTestButton() {
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
+    setError('');
     try {
       const res = await fetch('/api/tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
-      if (res.ok) {
-        const data = await res.json();
-        setOpen(false);
-        router.push(`/tests/${data.test.id}`);
-        router.refresh();
+      const data = await res.json();
+      if (!res.ok) {
+        setError(data.error ?? `Error ${res.status}`);
+        return;
       }
+      setOpen(false);
+      router.push(`/tests/${data.test?.id ?? ''}`);
+      router.refresh();
+    } catch (err) {
+      setError(String(err));
     } finally {
       setLoading(false);
     }
@@ -94,6 +100,10 @@ export default function NewTestButton() {
                   The more detail you include, the more accurate the simulation.
                 </p>
               </div>
+
+              {error && (
+                <p className="text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{error}</p>
+              )}
 
               <div className="flex gap-3 pt-2">
                 <button
