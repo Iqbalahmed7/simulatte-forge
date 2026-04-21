@@ -1,14 +1,14 @@
 import { SignJWT, jwtVerify } from 'jose';
 import { cookies } from 'next/headers';
 
-if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
-  throw new Error('[Forge] JWT_SECRET must be set in production.');
-}
-
-const getJwtSecret = () =>
-  new TextEncoder().encode(
+const getJwtSecret = () => {
+  if (process.env.NODE_ENV === 'production' && !process.env.JWT_SECRET) {
+    throw new Error('[Forge] JWT_SECRET must be set in production.');
+  }
+  return new TextEncoder().encode(
     process.env.JWT_SECRET ?? 'dev-secret-change-in-production'
   );
+};
 
 export interface SessionPayload {
   sub: string;       // user email
