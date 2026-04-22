@@ -2,6 +2,26 @@
 
 import { useState } from 'react';
 
+const LABEL: React.CSSProperties = {
+  fontFamily: "'Barlow', sans-serif",
+  fontSize: '11px',
+  fontWeight: 600,
+  letterSpacing: '0.18em',
+  textTransform: 'uppercase',
+  color: 'var(--static)',
+};
+
+const INPUT_STYLE: React.CSSProperties = {
+  fontFamily: "'Barlow', sans-serif",
+  fontSize: '14px',
+  color: 'var(--parchment)',
+  background: 'var(--layer-2)',
+  border: '1px solid var(--border)',
+  padding: '10px 14px',
+  outline: 'none',
+  width: '100%',
+};
+
 export default function AskPersonaPanel({ testId }: { testId: string }) {
   const [open, setOpen] = useState(false);
   const [question, setQuestion] = useState('');
@@ -18,59 +38,88 @@ export default function AskPersonaPanel({ testId }: { testId: string }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ question }),
       });
-      const data = await res.json();
-      setResponse(data);
+      setResponse(await res.json());
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <section className="mb-8">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-sm font-medium" style={{ color: 'var(--muted)' }}>ASK A PERSONA</h2>
+    <section className="mb-10">
+      <div className="flex items-center justify-between mb-5">
+        <span style={LABEL}>Ask a Persona</span>
         <button
           onClick={() => setOpen(!open)}
-          className="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:border-orange-500/30"
-          style={{ borderColor: 'var(--border)', color: 'var(--muted)', background: 'var(--card)' }}
+          style={{
+            fontFamily: "'Barlow', sans-serif",
+            fontSize: '12px',
+            fontWeight: 500,
+            color: open ? 'var(--parchment)' : 'var(--static)',
+            border: '1px solid var(--border)',
+            background: 'transparent',
+            padding: '5px 14px',
+            cursor: 'pointer',
+            letterSpacing: '0.02em',
+            transition: 'color 0.15s, border-color 0.15s',
+          }}
         >
           {open ? 'Close' : 'Ask question'}
         </button>
       </div>
 
       {open && (
-        <div className="rounded-xl p-5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-          <form onSubmit={handleAsk} className="flex gap-3 mb-4">
+        <div style={{ border: '1px solid var(--border)', background: 'var(--layer)', padding: '20px' }}>
+          <form onSubmit={handleAsk} className="flex gap-3 mb-5">
             <input
               type="text"
               value={question}
               onChange={e => setQuestion(e.target.value)}
               placeholder="e.g. Would you pay £4 for this? Why or why not?"
               required
-              className="flex-1 px-3.5 py-2.5 rounded-lg text-sm bg-white/5 border text-white placeholder:text-white/20 outline-none focus:border-orange-500/50 transition-colors"
-              style={{ borderColor: 'var(--border)' }}
+              style={{ ...INPUT_STYLE, flex: 1 }}
+              onFocus={e => (e.target.style.borderColor = 'var(--border-hi)')}
+              onBlur={e => (e.target.style.borderColor = 'var(--border)')}
             />
             <button
               type="submit"
               disabled={loading}
-              className="px-4 py-2 rounded-lg text-sm font-medium text-white disabled:opacity-50"
-              style={{ background: 'var(--accent)' }}
+              style={{
+                fontFamily: "'Barlow', sans-serif",
+                fontSize: '13px',
+                fontWeight: 600,
+                color: 'var(--void)',
+                background: loading ? 'var(--static)' : 'var(--signal)',
+                border: 'none',
+                padding: '10px 20px',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                letterSpacing: '0.04em',
+                textTransform: 'uppercase',
+                opacity: loading ? 0.7 : 1,
+                flexShrink: 0,
+              }}
             >
               {loading ? '…' : 'Ask'}
             </button>
           </form>
 
           {response && (
-            <div className="space-y-3">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {response.responses?.map((r: any, i: number) => (
-                <div key={i} className="rounded-lg p-4 bg-white/5">
-                  <p className="text-xs font-medium text-orange-400 mb-2">{r.persona_name ?? `Persona ${i + 1}`}</p>
-                  <p className="text-sm" style={{ color: 'var(--muted)' }}>{r.response}</p>
+                <div key={i} style={{ borderLeft: '2px solid var(--green-bd)', paddingLeft: '16px', paddingTop: '4px', paddingBottom: '4px' }}>
+                  <p style={{
+                    fontFamily: "'Martian Mono', monospace",
+                    fontSize: '11px',
+                    fontWeight: 500,
+                    color: 'var(--signal)',
+                    marginBottom: '6px',
+                    letterSpacing: '0.02em',
+                  }}>{r.persona_name ?? `Persona ${i + 1}`}</p>
+                  <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.7 }}>{r.response}</p>
                 </div>
               ))}
               {response.response && (
-                <div className="rounded-lg p-4 bg-white/5">
-                  <p className="text-sm" style={{ color: 'var(--muted)' }}>{response.response}</p>
+                <div style={{ borderLeft: '2px solid var(--border-hi)', paddingLeft: '16px' }}>
+                  <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.7 }}>{response.response}</p>
                 </div>
               )}
             </div>

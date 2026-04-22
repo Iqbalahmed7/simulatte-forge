@@ -21,10 +21,22 @@ export default function RunTestButton({ testId }: { testId: string }) {
     <button
       onClick={handleRun}
       disabled={loading}
-      className="px-4 py-2 rounded-lg text-sm font-medium text-white border transition-colors hover:border-orange-500/50 disabled:opacity-50"
-      style={{ borderColor: 'var(--border)', background: 'var(--card)' }}
+      style={{
+        fontFamily: "'Barlow', sans-serif",
+        fontSize: '13px',
+        fontWeight: 600,
+        color: loading ? 'var(--static)' : 'var(--void)',
+        background: loading ? 'transparent' : 'var(--signal)',
+        border: loading ? '1px solid var(--border)' : '1px solid var(--signal)',
+        padding: '8px 20px',
+        letterSpacing: '0.04em',
+        cursor: loading ? 'not-allowed' : 'pointer',
+        transition: 'opacity 0.15s',
+        opacity: loading ? 0.5 : 1,
+        textTransform: 'uppercase',
+      }}
     >
-      {loading ? '⏳ Running…' : '▶ Re-run Test'}
+      {loading ? 'Running…' : 'Run Test'}
     </button>
   );
 }

@@ -3,8 +3,36 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-const INPUT = "w-full px-3.5 py-2.5 rounded-lg text-sm bg-white/5 border text-white placeholder:text-white/20 outline-none focus:border-orange-500/50 transition-colors";
-const BORDER = { borderColor: 'var(--border)' };
+const LABEL: React.CSSProperties = {
+  display: 'block',
+  fontFamily: "'Barlow', sans-serif",
+  fontSize: '11px',
+  fontWeight: 600,
+  letterSpacing: '0.14em',
+  textTransform: 'uppercase',
+  color: 'var(--static)',
+  marginBottom: '6px',
+};
+
+const INPUT: React.CSSProperties = {
+  width: '100%',
+  fontFamily: "'Barlow', sans-serif",
+  fontSize: '14px',
+  color: 'var(--parchment)',
+  background: 'var(--layer-2)',
+  border: '1px solid var(--border)',
+  padding: '9px 13px',
+  outline: 'none',
+};
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <label style={LABEL}>{label}</label>
+      {children}
+    </div>
+  );
+}
 
 export default function NewTestButton() {
   const router = useRouter();
@@ -12,22 +40,21 @@ export default function NewTestButton() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [form, setForm] = useState({
-    name: '',
-    product_name: '',
-    brand_name: '',
-    tagline: '',
-    description: '',
-    format: '',
-    price_point: '',
-    target_consumer: '',
-    key_benefits: '',   // comma-separated, split before sending
-    category: '',
-    market: 'UK',
+    name: '', product_name: '', brand_name: '', tagline: '',
+    description: '', format: '', price_point: '', target_consumer: '',
+    key_benefits: '', category: '', market: 'UK',
   });
 
   function set(field: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
       setForm(f => ({ ...f, [field]: e.target.value }));
+  }
+
+  function focusIn(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    e.target.style.borderColor = 'var(--border-hi)';
+  }
+  function focusOut(e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) {
+    e.target.style.borderColor = 'var(--border)';
   }
 
   async function handleCreate(e: React.FormEvent) {
@@ -47,17 +74,13 @@ export default function NewTestButton() {
         category: form.category,
         market: form.market,
       };
-
       const res = await fetch('/api/tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ name: form.name, concept_card }),
       });
       const data = await res.json();
-      if (!res.ok) {
-        setError(data.error ?? `Error ${res.status}`);
-        return;
-      }
+      if (!res.ok) { setError(data.error ?? `Error ${res.status}`); return; }
       setOpen(false);
       router.push(`/tests/${data.test?.id ?? ''}`);
       router.refresh();
@@ -72,110 +95,140 @@ export default function NewTestButton() {
     <>
       <button
         onClick={() => setOpen(true)}
-        className="px-4 py-2 rounded-lg text-sm font-medium text-white transition-opacity hover:opacity-80"
-        style={{ background: 'var(--accent)' }}
+        style={{
+          fontFamily: "'Barlow', sans-serif",
+          fontSize: '13px',
+          fontWeight: 600,
+          color: 'var(--void)',
+          background: 'var(--signal)',
+          border: '1px solid var(--signal)',
+          padding: '8px 20px',
+          letterSpacing: '0.06em',
+          textTransform: 'uppercase',
+          cursor: 'pointer',
+        }}
       >
         + New Test
       </button>
 
       {open && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto"
-          style={{ background: 'rgba(0,0,0,0.8)' }}>
-          <div className="w-full max-w-xl rounded-2xl p-6 border my-8"
-            style={{ background: '#111118', borderColor: 'var(--border)' }}>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-lg font-semibold text-white">New Concept Test</h2>
-              <button onClick={() => setOpen(false)} className="text-white/40 hover:text-white text-xl leading-none">×</button>
+        <div
+          style={{
+            position: 'fixed', inset: 0, zIndex: 50,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '16px', overflowY: 'auto',
+            background: 'rgba(5,5,5,0.88)',
+          }}
+        >
+          <div style={{
+            width: '100%', maxWidth: '560px',
+            background: 'var(--layer)',
+            border: '1px solid var(--border-hi)',
+            padding: '32px',
+            margin: '32px 0',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '28px' }}>
+              <h2 style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: '22px', fontWeight: 800,
+                color: 'var(--parchment)', letterSpacing: '0.02em',
+              }}>
+                New Concept <span style={{ color: 'var(--signal)' }}>Test</span>
+              </h2>
+              <button
+                onClick={() => setOpen(false)}
+                style={{ color: 'var(--static)', fontSize: '20px', cursor: 'pointer', background: 'none', border: 'none', lineHeight: 1 }}
+              >×</button>
             </div>
 
-            <form onSubmit={handleCreate} className="space-y-3">
-              {/* Test name */}
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Test Name</label>
+            <form onSubmit={handleCreate} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <Field label="Test Name">
                 <input type="text" required value={form.name} onChange={set('name')}
-                  placeholder="e.g. Oat Protein Bar — Summer 2025" className={INPUT} style={BORDER} />
-              </div>
+                  placeholder="Oat Protein Bar — Summer 2025" style={INPUT}
+                  onFocus={focusIn} onBlur={focusOut} />
+              </Field>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Product Name</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <Field label="Product Name">
                   <input type="text" required value={form.product_name} onChange={set('product_name')}
-                    placeholder="ProOat Bar" className={INPUT} style={BORDER} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Brand Name</label>
+                    placeholder="ProOat Bar" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+                </Field>
+                <Field label="Brand Name">
                   <input type="text" value={form.brand_name} onChange={set('brand_name')}
-                    placeholder="Graze" className={INPUT} style={BORDER} />
-                </div>
+                    placeholder="Graze" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+                </Field>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Tagline</label>
+              <Field label="Tagline">
                 <input type="text" required value={form.tagline} onChange={set('tagline')}
-                  placeholder="Fuel your focus, naturally" className={INPUT} style={BORDER} />
-              </div>
+                  placeholder="Fuel your focus, naturally" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+              </Field>
 
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Description</label>
+              <Field label="Description">
                 <textarea required rows={3} value={form.description} onChange={set('description')}
-                  placeholder="A high-protein oat bar made with real ingredients. No artificial sweeteners. 20g protein per bar."
-                  className={INPUT + " resize-none"} style={BORDER} />
-              </div>
+                  placeholder="A high-protein oat bar made with real ingredients. 20g protein per bar."
+                  style={{ ...INPUT, resize: 'none' }} onFocus={focusIn} onBlur={focusOut} />
+              </Field>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Format / Pack Size</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <Field label="Format / Pack Size">
                   <input type="text" required value={form.format} onChange={set('format')}
-                    placeholder="60g bar, box of 12" className={INPUT} style={BORDER} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Price Point</label>
+                    placeholder="60g bar, box of 12" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+                </Field>
+                <Field label="Price Point">
                   <input type="text" required value={form.price_point} onChange={set('price_point')}
-                    placeholder="£3.50 per bar" className={INPUT} style={BORDER} />
-                </div>
+                    placeholder="£3.50 per bar" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+                </Field>
               </div>
 
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Target Consumer</label>
+              <Field label="Target Consumer">
                 <input type="text" required value={form.target_consumer} onChange={set('target_consumer')}
-                  placeholder="Busy professionals 25-40, health-conscious, gym-goers" className={INPUT} style={BORDER} />
-              </div>
+                  placeholder="Busy professionals 25–40, health-conscious" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+              </Field>
 
-              <div>
-                <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Key Benefits <span className="opacity-50">(comma-separated)</span></label>
+              <Field label={`Key Benefits \u2014 comma-separated`}>
                 <input type="text" required value={form.key_benefits} onChange={set('key_benefits')}
-                  placeholder="20g protein, no artificial sweeteners, high fibre, convenient" className={INPUT} style={BORDER} />
-              </div>
+                  placeholder="20g protein, no artificial sweeteners, high fibre" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+              </Field>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Category</label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                <Field label="Category">
                   <input type="text" required value={form.category} onChange={set('category')}
-                    placeholder="Snacks / Protein Bars" className={INPUT} style={BORDER} />
-                </div>
-                <div>
-                  <label className="block text-xs font-medium mb-1" style={{ color: 'var(--muted)' }}>Market</label>
-                  <select value={form.market} onChange={set('market')} className={INPUT} style={BORDER}>
+                    placeholder="Snacks / Protein Bars" style={INPUT} onFocus={focusIn} onBlur={focusOut} />
+                </Field>
+                <Field label="Market">
+                  <select value={form.market} onChange={set('market')}
+                    style={{ ...INPUT, cursor: 'pointer' }} onFocus={focusIn} onBlur={focusOut}>
                     <option value="UK">UK</option>
                     <option value="US">US</option>
                     <option value="IN">India</option>
                   </select>
-                </div>
+                </Field>
               </div>
 
               {error && (
-                <p className="text-xs text-red-400 bg-red-400/10 px-3 py-2 rounded-lg">{error}</p>
+                <p style={{
+                  fontFamily: "'Barlow', sans-serif", fontSize: '13px',
+                  color: 'var(--alert)', background: 'rgba(224,85,85,0.08)',
+                  border: '1px solid rgba(224,85,85,0.20)', padding: '10px 14px',
+                }}>{error}</p>
               )}
 
-              <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setOpen(false)}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-medium border transition-colors hover:bg-white/5"
-                  style={{ borderColor: 'var(--border)', color: 'var(--muted)' }}>
-                  Cancel
-                </button>
-                <button type="submit" disabled={loading}
-                  className="flex-1 py-2.5 rounded-lg text-sm font-medium text-white transition-opacity disabled:opacity-50"
-                  style={{ background: 'var(--accent)' }}>
+              <div style={{ display: 'flex', gap: '12px', paddingTop: '8px' }}>
+                <button type="button" onClick={() => setOpen(false)} style={{
+                  flex: 1, padding: '10px', cursor: 'pointer',
+                  fontFamily: "'Barlow', sans-serif", fontSize: '13px', fontWeight: 500,
+                  color: 'var(--static)', background: 'transparent',
+                  border: '1px solid var(--border)', letterSpacing: '0.04em',
+                  textTransform: 'uppercase',
+                }}>Cancel</button>
+                <button type="submit" disabled={loading} style={{
+                  flex: 1, padding: '10px', cursor: loading ? 'not-allowed' : 'pointer',
+                  fontFamily: "'Barlow', sans-serif", fontSize: '13px', fontWeight: 600,
+                  color: 'var(--void)', background: loading ? 'var(--static)' : 'var(--signal)',
+                  border: 'none', letterSpacing: '0.06em', textTransform: 'uppercase',
+                  opacity: loading ? 0.7 : 1,
+                }}>
                   {loading ? 'Launching…' : 'Launch Test'}
                 </button>
               </div>

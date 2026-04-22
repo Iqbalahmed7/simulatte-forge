@@ -1,18 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #0a0a0f;
-  --foreground: #e8e8f0;
-  --accent: #ff6b35;
-  --accent-dim: rgba(255, 107, 53, 0.15);
-  --border: rgba(255,255,255,0.08);
-  --card: rgba(255,255,255,0.04);
-  --muted: rgba(255,255,255,0.4);
+  --void:        #050505;
+  --parchment:   #E9E6DF;
+  --signal:      #A8FF3E;
+  --layer:       #111111;
+  --layer-2:     #1A1A1A;
+  --static:      #9A9997;
+  --alert:       #E05555;
+
+  --border:      rgba(233,230,223,0.08);
+  --border-hi:   rgba(233,230,223,0.20);
+  --tint:        rgba(233,230,223,0.04);
+  --green-bd:    rgba(168,255,62,0.32);
+  --green-tint:  rgba(168,255,62,0.06);
+
+  /* Legacy compat aliases */
+  --background:  var(--void);
+  --foreground:  var(--parchment);
+  --accent:      var(--signal);
+  --card:        var(--layer);
+  --muted:       var(--static);
+}
+
+* {
+  border-radius: 0 !important;
+  box-shadow: none !important;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: 'Inter', system-ui, sans-serif;
+  background: var(--void);
+  color: var(--parchment);
+  font-family: 'Barlow', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  font-family: 'Barlow Condensed', sans-serif;
 }

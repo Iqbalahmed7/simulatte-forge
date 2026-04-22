@@ -4,23 +4,55 @@ import Link from 'next/link';
 import RunTestButton from '@/components/RunTestButton';
 import AskPersonaPanel from '@/components/AskPersonaPanel';
 
-function score(val: number | null | undefined) {
-  if (val == null) return '—';
-  return val.toFixed(1);
+const EYEBROW: React.CSSProperties = {
+  fontFamily: "'Barlow', sans-serif",
+  fontSize: '11px', fontWeight: 600,
+  letterSpacing: '0.18em', textTransform: 'uppercase' as const,
+  color: 'var(--static)',
+};
+
+function fmt(val: number | null | undefined) {
+  return val != null ? val.toFixed(1) : '—';
 }
 
-function ScoreCard({ label, value, max = 10 }: { label: string; value: number | null | undefined; max?: number }) {
+function ScoreCard({ label, value, max = 10, highlight = false }: {
+  label: string; value: number | null | undefined; max?: number; highlight?: boolean;
+}) {
   const pct = value != null ? (value / max) * 100 : 0;
   return (
-    <div className="rounded-xl p-4 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-      <div className="text-2xl font-semibold text-white mb-0.5">
-        {score(value)}<span className="text-sm text-white/30">/{max}</span>
+    <div style={{
+      background: highlight ? 'var(--green-tint)' : 'var(--layer)',
+      border: `1px solid ${highlight ? 'var(--green-bd)' : 'var(--border)'}`,
+      padding: '16px',
+    }}>
+      <div style={{
+        fontFamily: "'Martian Mono', monospace",
+        fontSize: '24px', fontWeight: 500,
+        color: highlight ? 'var(--signal)' : 'var(--parchment)',
+        lineHeight: 1, marginBottom: '4px',
+      }}>
+        {fmt(value)}<span style={{ fontSize: '11px', color: 'var(--static)', fontWeight: 400 }}>/{max}</span>
       </div>
-      <div className="text-xs mb-2" style={{ color: 'var(--muted)' }}>{label}</div>
-      <div className="h-1 rounded-full bg-white/5 overflow-hidden">
-        <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: 'var(--accent)' }} />
+      <div style={{ ...EYEBROW, marginBottom: '10px', letterSpacing: '0.12em' }}>{label}</div>
+      <div style={{ height: '2px', background: 'var(--border)', overflow: 'hidden' }}>
+        <div style={{ height: '100%', width: `${pct}%`, background: highlight ? 'var(--signal)' : 'rgba(233,230,223,0.20)', transition: 'width 0.6s ease' }} />
       </div>
     </div>
+  );
+}
+
+function StatusTag({ status }: { status: string }) {
+  const isComplete = status === 'complete';
+  return (
+    <span style={{
+      fontFamily: "'Martian Mono', monospace",
+      fontSize: '10px', fontWeight: 500,
+      letterSpacing: '0.06em',
+      color: isComplete ? 'var(--signal)' : 'var(--static)',
+      border: `1px solid ${isComplete ? 'var(--green-bd)' : 'var(--border)'}`,
+      background: isComplete ? 'var(--green-tint)' : 'transparent',
+      padding: '3px 10px',
+    }}>{status}</span>
   );
 }
 
@@ -38,88 +70,101 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
 
   if (!test) {
     return (
-      <div className="text-center py-24">
-        <p className="text-white/40">Test not found</p>
-        <Link href="/tests" className="text-sm text-orange-400 mt-2 block">← Back to tests</Link>
+      <div style={{ textAlign: 'center', paddingTop: '80px' }}>
+        <p style={{ color: 'var(--static)', marginBottom: '12px' }}>Test not found.</p>
+        <Link href="/tests" style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'var(--signal)', textDecoration: 'none' }}>← Back to tests</Link>
       </div>
     );
   }
 
+  const cc = test.concept_card ?? {};
+
   return (
     <div>
       {/* Breadcrumb */}
-      <Link href="/tests" className="text-sm transition-opacity hover:opacity-70 mb-6 inline-block" style={{ color: 'var(--muted)' }}>
-        ← All Tests
-      </Link>
+      <Link href="/tests" style={{
+        fontFamily: "'Barlow', sans-serif", fontSize: '13px',
+        color: 'var(--static)', textDecoration: 'none', display: 'inline-block', marginBottom: '24px',
+      }}>← All Tests</Link>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-8">
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '40px', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>
         <div>
-          <div className="flex items-center gap-3 mb-2">
-            <h1 className="text-2xl font-semibold text-white">{test.name}</h1>
-            <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-              test.status === 'complete' ? 'bg-green-500/10 text-green-400' :
-              test.status === 'running' ? 'bg-blue-500/10 text-blue-400' :
-              'bg-yellow-500/10 text-yellow-400'
-            }`}>{test.status}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+            <StatusTag status={test.status} />
+            {cc.market && (
+              <span style={{
+                fontFamily: "'Martian Mono', monospace", fontSize: '10px',
+                color: 'var(--static)', border: '1px solid var(--border)', padding: '3px 10px',
+              }}>{cc.market}</span>
+            )}
           </div>
-          {test.category && <p className="text-sm" style={{ color: 'var(--muted)' }}>{test.category}</p>}
+          <h1 style={{
+            fontFamily: "'Barlow Condensed', sans-serif",
+            fontSize: 'clamp(28px,3.5vw,42px)', fontWeight: 800,
+            color: 'var(--parchment)', lineHeight: 1, letterSpacing: '0.01em',
+          }}>{test.name}</h1>
+          {cc.category && (
+            <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'var(--static)', marginTop: '6px' }}>{cc.category}</p>
+          )}
         </div>
         <RunTestButton testId={testId} />
       </div>
 
       {/* Scorecard */}
       {scorecard ? (
-        <section className="mb-8">
-          <h2 className="text-sm font-medium mb-4" style={{ color: 'var(--muted)' }}>SCORECARD</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-            <ScoreCard label="Purchase Intent" value={scorecard.purchase_intent_score} />
+        <section style={{ marginBottom: '48px' }}>
+          <p style={{ ...EYEBROW, marginBottom: '16px' }}>Scorecard</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1px', background: 'var(--border)', marginBottom: '24px' }}>
+            <ScoreCard label="Purchase Intent" value={scorecard.purchase_intent_score} highlight />
             <ScoreCard label="Distinctiveness" value={scorecard.distinctiveness_score} />
             <ScoreCard label="Believability" value={scorecard.believability_score} />
             <ScoreCard label="Relevance" value={scorecard.relevance_score} />
             <ScoreCard label="Value" value={scorecard.value_perception_score} />
-            <ScoreCard label="Likelihood" value={scorecard.trial_likelihood} />
+            <ScoreCard label="Trial Likelihood" value={scorecard.trial_likelihood} />
           </div>
 
           {scorecard.headline && (
-            <div className="rounded-xl p-5 border mb-4" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-              <p className="text-sm font-medium text-white mb-1">Headline Verdict</p>
-              <p className="text-sm" style={{ color: 'var(--muted)' }}>{scorecard.headline}</p>
+            <div style={{ background: 'var(--layer)', border: '1px solid var(--border)', padding: '20px', marginBottom: '16px' }}>
+              <p style={{ ...EYEBROW, marginBottom: '8px' }}>Verdict</p>
+              <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '16px', fontWeight: 500, color: 'rgba(233,230,223,0.88)', lineHeight: 1.65 }}>
+                {scorecard.headline}
+              </p>
             </div>
           )}
 
-          <div className="grid sm:grid-cols-3 gap-4">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1px', background: 'var(--border)' }}>
             {scorecard.key_strengths?.length > 0 && (
-              <div className="rounded-xl p-4 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-                <p className="text-xs font-medium text-green-400 mb-3">STRENGTHS</p>
-                <ul className="space-y-1.5">
+              <div style={{ background: 'var(--layer)', padding: '20px' }}>
+                <p style={{ ...EYEBROW, color: 'var(--signal)', marginBottom: '14px' }}>Strengths</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {scorecard.key_strengths.map((s: string, i: number) => (
-                    <li key={i} className="text-sm flex gap-2" style={{ color: 'var(--muted)' }}>
-                      <span className="text-green-400 mt-0.5">✓</span>{s}
+                    <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
+                      <span style={{ color: 'var(--signal)', flexShrink: 0, marginTop: '1px' }}>↑</span>{s}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
             {scorecard.key_weaknesses?.length > 0 && (
-              <div className="rounded-xl p-4 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-                <p className="text-xs font-medium text-red-400 mb-3">WEAKNESSES</p>
-                <ul className="space-y-1.5">
+              <div style={{ background: 'var(--layer)', padding: '20px' }}>
+                <p style={{ ...EYEBROW, marginBottom: '14px' }}>Weaknesses</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {scorecard.key_weaknesses.map((w: string, i: number) => (
-                    <li key={i} className="text-sm flex gap-2" style={{ color: 'var(--muted)' }}>
-                      <span className="text-red-400 mt-0.5">✗</span>{w}
+                    <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
+                      <span style={{ color: 'var(--static)', flexShrink: 0, marginTop: '1px' }}>↓</span>{w}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
             {scorecard.recommendations?.length > 0 && (
-              <div className="rounded-xl p-4 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-                <p className="text-xs font-medium text-orange-400 mb-3">RECOMMENDATIONS</p>
-                <ul className="space-y-1.5">
+              <div style={{ background: 'var(--layer)', padding: '20px' }}>
+                <p style={{ ...EYEBROW, marginBottom: '14px' }}>Recommendations</p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   {scorecard.recommendations.map((r: string, i: number) => (
-                    <li key={i} className="text-sm flex gap-2" style={{ color: 'var(--muted)' }}>
-                      <span className="text-orange-400 mt-0.5">→</span>{r}
+                    <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
+                      <span style={{ color: 'var(--parchment)', flexShrink: 0, marginTop: '1px' }}>→</span>{r}
                     </li>
                   ))}
                 </ul>
@@ -128,9 +173,9 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
           </div>
         </section>
       ) : (
-        <div className="rounded-xl p-8 border mb-8 text-center" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-          <p className="text-sm" style={{ color: 'var(--muted)' }}>
-            {test.status === 'running' ? '⏳ Simulation running — results will appear here shortly' : 'No scorecard yet. Run the test to generate results.'}
+        <div style={{ background: 'var(--layer)', border: '1px solid var(--border)', padding: '32px', textAlign: 'center', marginBottom: '48px' }}>
+          <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'var(--static)' }}>
+            {test.status === 'running' ? 'Simulation running — results will appear here shortly.' : 'No scorecard yet. Run the test to generate results.'}
           </p>
         </div>
       )}
@@ -139,39 +184,85 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
       <AskPersonaPanel testId={testId} />
 
       {/* Concept Card */}
-      <section className="mb-8">
-        <h2 className="text-sm font-medium mb-4" style={{ color: 'var(--muted)' }}>CONCEPT CARD</h2>
-        <div className="rounded-xl p-5 border" style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
-          <p className="text-sm whitespace-pre-wrap" style={{ color: 'var(--muted)' }}>{test.concept_card}</p>
-        </div>
-      </section>
+      {Object.keys(cc).length > 0 && (
+        <section style={{ marginBottom: '48px' }}>
+          <p style={{ ...EYEBROW, marginBottom: '16px' }}>Concept Card</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: '1px', background: 'var(--border)' }}>
+            {[
+              { key: 'product_name', label: 'Product' },
+              { key: 'brand_name', label: 'Brand' },
+              { key: 'format', label: 'Format' },
+              { key: 'price_point', label: 'Price' },
+              { key: 'target_consumer', label: 'Target Consumer' },
+              { key: 'category', label: 'Category' },
+            ].filter(f => cc[f.key]).map(({ key, label }) => (
+              <div key={key} style={{ background: 'var(--layer)', padding: '16px' }}>
+                <p style={{ ...EYEBROW, marginBottom: '6px' }}>{label}</p>
+                <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)' }}>{cc[key]}</p>
+              </div>
+            ))}
+            {cc.tagline && (
+              <div style={{ background: 'var(--layer)', padding: '16px', gridColumn: '1 / -1' }}>
+                <p style={{ ...EYEBROW, marginBottom: '6px' }}>Tagline</p>
+                <p style={{ fontFamily: "'Barlow Condensed', sans-serif", fontWeight: 700, fontSize: '18px', color: 'var(--parchment)' }}>{cc.tagline}</p>
+              </div>
+            )}
+            {cc.description && (
+              <div style={{ background: 'var(--layer)', padding: '16px', gridColumn: '1 / -1' }}>
+                <p style={{ ...EYEBROW, marginBottom: '6px' }}>Description</p>
+                <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.7 }}>{cc.description}</p>
+              </div>
+            )}
+            {cc.key_benefits?.length > 0 && (
+              <div style={{ background: 'var(--layer)', padding: '16px', gridColumn: '1 / -1' }}>
+                <p style={{ ...EYEBROW, marginBottom: '10px' }}>Key Benefits</p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {cc.key_benefits.map((b: string, i: number) => (
+                    <span key={i} style={{
+                      fontFamily: "'Barlow', sans-serif", fontSize: '13px',
+                      color: 'rgba(233,230,223,0.88)',
+                      border: '1px solid var(--border)', padding: '4px 12px',
+                    }}>{b}</span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </section>
+      )}
 
-      {/* Runs */}
+      {/* Persona Runs */}
       {runs.length > 0 && (
-        <section>
-          <h2 className="text-sm font-medium mb-4" style={{ color: 'var(--muted)' }}>PERSONA RUNS ({runs.length})</h2>
-          <div className="space-y-2">
+        <section style={{ marginBottom: '48px' }}>
+          <p style={{ ...EYEBROW, marginBottom: '16px' }}>Persona Runs <span style={{ color: 'rgba(233,230,223,0.40)', fontWeight: 400, marginLeft: '8px' }}>({runs.length})</span></p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: 'var(--border)' }}>
             {runs.map((run: any) => (
-              <div key={run.id} className="rounded-xl p-4 border flex items-center justify-between"
-                style={{ background: 'var(--card)', borderColor: 'var(--border)' }}>
+              <div key={run.id} style={{ background: 'var(--layer)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                  <p className="text-sm font-medium text-white">{run.persona_name ?? `Persona ${run.id.slice(0, 8)}`}</p>
+                  <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', fontWeight: 600, color: 'var(--parchment)', marginBottom: '3px' }}>
+                    {run.persona_name ?? `Persona ${run.id.slice(0, 8)}`}
+                  </p>
                   {run.persona_profile?.age && (
-                    <p className="text-xs mt-0.5" style={{ color: 'var(--muted)' }}>
+                    <p style={{ fontFamily: "'Martian Mono', monospace", fontSize: '10px', color: 'var(--static)' }}>
                       {run.persona_profile.age}y · {run.persona_profile.location ?? ''} · {run.persona_profile.occupation ?? ''}
                     </p>
                   )}
                 </div>
-                <div className="flex items-center gap-4 text-right">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
                   {run.purchase_intent != null && (
-                    <div>
-                      <div className="text-sm font-medium text-white">{run.purchase_intent}<span className="text-xs text-white/30">/10</span></div>
-                      <div className="text-xs" style={{ color: 'var(--muted)' }}>intent</div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontFamily: "'Martian Mono', monospace", fontSize: '16px', fontWeight: 500, color: 'var(--parchment)' }}>
+                        {run.purchase_intent}<span style={{ fontSize: '10px', color: 'var(--static)' }}>/10</span>
+                      </div>
+                      <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: '11px', color: 'var(--static)' }}>intent</div>
                     </div>
                   )}
-                  <span className={`text-xs px-2 py-0.5 rounded-full ${run.status === 'complete' ? 'bg-green-500/10 text-green-400' : 'bg-yellow-500/10 text-yellow-400'}`}>
-                    {run.status}
-                  </span>
+                  <span style={{
+                    fontFamily: "'Martian Mono', monospace", fontSize: '10px',
+                    color: run.status === 'complete' ? 'var(--signal)' : 'var(--static)',
+                    border: `1px solid ${run.status === 'complete' ? 'var(--green-bd)' : 'var(--border)'}`,
+                    padding: '3px 10px',
+                  }}>{run.status}</span>
                 </div>
               </div>
             ))}
