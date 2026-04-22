@@ -39,11 +39,20 @@ export default function NewTestButton() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [pools, setPools] = useState<any[]>([]);
   const [form, setForm] = useState({
     name: '', product_name: '', brand_name: '', tagline: '',
     description: '', format: '', price_point: '', target_consumer: '',
-    key_benefits: '', category: '', market: 'UK',
+    key_benefits: '', category: '', market: 'UK', pool_id: '',
   });
+
+  async function openModal() {
+    setOpen(true);
+    try {
+      const res = await fetch('/api/pools');
+      if (res.ok) { const d = await res.json(); setPools(d.pools ?? []); }
+    } catch { /* pools optional */ }
+  }
 
   function set(field: string) {
     return (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
@@ -77,7 +86,11 @@ export default function NewTestButton() {
       const res = await fetch('/api/tests', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: form.name, concept_card }),
+        body: JSON.stringify({
+          name: form.name,
+          concept_card,
+          ...(form.pool_id ? { pool_id: form.pool_id } : {}),
+        }),
       });
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? `Error ${res.status}`); return; }
@@ -94,7 +107,7 @@ export default function NewTestButton() {
   return (
     <>
       <button
-        onClick={() => setOpen(true)}
+        onClick={openModal}
         style={{
           fontFamily: "'Barlow', sans-serif",
           fontSize: '13px',
@@ -204,6 +217,41 @@ export default function NewTestButton() {
                     <option value="IN">India</option>
                   </select>
                 </Field>
+              </div>
+
+              {/* Persona Pool — optional, loads from /api/pools */}
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+                <label style={LABEL}>
+                  Persona Pool{' '}
+                  <span style={{ fontWeight: 400, letterSpacing: '0.02em', textTransform: 'none' as const, opacity: 0.6 }}>— optional</span>
+                </label>
+                {pools.length === 0 ? (
+                  <div style={{
+                    fontFamily: "'Barlow', sans-serif", fontSize: '13px',
+                    color: 'var(--static)', padding: '9px 13px',
+                    border: '1px solid var(--border)', background: 'var(--layer-2)',
+                  }}>
+                    No pools yet —{' '}
+                    <a href="/pools" target="_blank" style={{ color: 'var(--signal)', textDecoration: 'none' }}>
+                      create one in Pools ↗
+                    </a>
+                    {' '}or Iris will sync cohorts here automatically.
+                  </div>
+                ) : (
+                  <select
+                    value={form.pool_id}
+                    onChange={set('pool_id')}
+                    style={{ ...INPUT, cursor: 'pointer' }}
+                    onFocus={focusIn} onBlur={focusOut}
+                  >
+                    <option value="">Auto-generate personas for this test</option>
+                    {pools.map((p: any) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name} · {p.market} · {p.persona_count ?? p.size ?? '?'} personas
+                      </option>
+                    ))}
+                  </select>
+                )}
               </div>
 
               {error && (
