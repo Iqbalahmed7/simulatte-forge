@@ -5,6 +5,7 @@ import RunTestButton from '@/components/RunTestButton';
 import AskPersonaPanel from '@/components/AskPersonaPanel';
 import LiveTestPoller from '@/components/LiveTestPoller';
 import PersonaRunsTable from '@/components/PersonaRunsTable';
+import VariantButton from '@/components/VariantButton';
 
 const EYEBROW: React.CSSProperties = {
   fontFamily: "'Barlow', sans-serif",
@@ -111,7 +112,25 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
             <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'var(--static)', marginTop: '6px' }}>{cc.category}</p>
           )}
         </div>
-        <RunTestButton testId={testId} />
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexShrink: 0 }}>
+          {scorecard && (
+            <a
+              href={`/report/${testId}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{
+                fontFamily: "'Barlow', sans-serif", fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: 'var(--static)', border: '1px solid var(--border)',
+                padding: '6px 14px', textDecoration: 'none', display: 'inline-block',
+              }}
+            >
+              ↓ Report
+            </a>
+          )}
+          <VariantButton testId={testId} conceptCard={cc} tenantId={test.tenant_id} />
+          <RunTestButton testId={testId} />
+        </div>
       </div>
 
       {/* Scorecard */}
