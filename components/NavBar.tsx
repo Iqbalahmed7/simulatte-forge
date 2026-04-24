@@ -37,19 +37,43 @@ export default function NavBar({ tenantId, isAdmin }: { tenantId: string; isAdmi
     >
       {/* Left: wordmark + nav */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '32px' }}>
-        <Link href="/tests" style={{ display: 'flex', alignItems: 'center', gap: '10px', textDecoration: 'none' }}>
-          <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
-            <circle cx="10" cy="10" r="9" stroke="#A8FF3E" strokeWidth="1" opacity="0.9" />
-            <circle cx="10" cy="10" r="5.5" stroke="#A8FF3E" strokeWidth="1" opacity="0.6" />
-            <circle cx="10" cy="10" r="2" fill="#A8FF3E" opacity="0.9" />
+        <Link href="/tests" style={{ display: 'flex', alignItems: 'center', gap: '12px', textDecoration: 'none' }}>
+          {/* Engine mark — satellite nodes + flow lines + triple-ring core */}
+          <svg width="28" height="28" viewBox="0 0 64 64" fill="none" aria-hidden="true">
+            {/* Satellite input nodes */}
+            <circle cx="8"  cy="14" r="3.5" fill="none" stroke="rgba(233,230,223,0.35)" strokeWidth="1.25"/>
+            <circle cx="8"  cy="14" r="1.2" fill="rgba(233,230,223,0.35)"/>
+            <circle cx="10" cy="38" r="2.5" fill="none" stroke="rgba(233,230,223,0.22)" strokeWidth="1"/>
+            <circle cx="10" cy="38" r=".8"  fill="rgba(233,230,223,0.22)"/>
+            <circle cx="6"  cy="50" r="1.8" fill="rgba(233,230,223,0.14)"/>
+            {/* Flow lines to core */}
+            <line x1="11" y1="15" x2="19" y2="22" stroke="rgba(168,255,62,0.40)" strokeWidth="1"/>
+            <line x1="12" y1="37" x2="19" y2="29" stroke="rgba(168,255,62,0.28)" strokeWidth=".75"/>
+            <line x1="9"  y1="49" x2="19" y2="35" stroke="rgba(168,255,62,0.18)" strokeWidth=".75"/>
+            {/* Triple-ring focal node */}
+            <circle cx="32" cy="32" r="29" fill="none" stroke="rgba(168,255,62,0.18)" strokeWidth="1.5"/>
+            <circle cx="32" cy="32" r="20" fill="none" stroke="rgba(168,255,62,0.52)" strokeWidth="2"/>
+            <circle cx="32" cy="32" r="8"  fill="#A8FF3E"/>
           </svg>
-          <span style={{
-            fontFamily: "'Barlow Condensed', sans-serif",
-            fontWeight: 800, fontSize: '16px',
-            letterSpacing: '0.04em', color: 'var(--parchment)',
-          }}>
-            SIMULATTE <span style={{ color: 'var(--signal)' }}>FORGE</span>
-          </span>
+
+          {/* Wordmark: unified parchment — brand rule: no green in wordmark */}
+          <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1 }}>
+            <span style={{
+              fontFamily: "'Barlow Condensed', sans-serif",
+              fontWeight: 800, fontSize: '18px',
+              letterSpacing: '-0.01em', color: '#E9E6DF',
+            }}>
+              Simulatte
+            </span>
+            <span style={{
+              fontFamily: "'Barlow', sans-serif",
+              fontWeight: 600, fontSize: '10px',
+              letterSpacing: '0.18em', color: '#9A9997',
+              textTransform: 'uppercase', marginTop: '1px',
+            }}>
+              Forge
+            </span>
+          </div>
         </Link>
 
         <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
