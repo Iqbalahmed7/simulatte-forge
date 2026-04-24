@@ -4,6 +4,7 @@ import Link from 'next/link';
 import RunTestButton from '@/components/RunTestButton';
 import AskPersonaPanel from '@/components/AskPersonaPanel';
 import LiveTestPoller from '@/components/LiveTestPoller';
+import PersonaRunsTable from '@/components/PersonaRunsTable';
 
 const EYEBROW: React.CSSProperties = {
   fontFamily: "'Barlow', sans-serif",
@@ -306,43 +307,7 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
       )}
 
       {/* Persona Runs */}
-      {runs.length > 0 && (
-        <section style={{ marginBottom: '48px' }}>
-          <p style={{ ...EYEBROW, marginBottom: '16px' }}>Persona Runs <span style={{ color: 'rgba(233,230,223,0.40)', fontWeight: 400, marginLeft: '8px' }}>({runs.length})</span></p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1px', background: 'var(--border)' }}>
-            {runs.map((run: any) => (
-              <div key={run.id} style={{ background: 'var(--layer)', padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div>
-                  <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '14px', fontWeight: 600, color: 'var(--parchment)', marginBottom: '3px' }}>
-                    {run.persona_name ?? `Persona ${run.id.slice(0, 8)}`}
-                  </p>
-                  {run.persona_profile?.age && (
-                    <p style={{ fontFamily: "'Martian Mono', monospace", fontSize: '10px', color: 'var(--static)' }}>
-                      {run.persona_profile.age}y · {run.persona_profile.location ?? ''} · {run.persona_profile.occupation ?? ''}
-                    </p>
-                  )}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-                  {run.purchase_intent != null && (
-                    <div style={{ textAlign: 'right' }}>
-                      <div style={{ fontFamily: "'Martian Mono', monospace", fontSize: '16px', fontWeight: 500, color: 'var(--parchment)' }}>
-                        {run.purchase_intent}<span style={{ fontSize: '10px', color: 'var(--static)' }}>/10</span>
-                      </div>
-                      <div style={{ fontFamily: "'Barlow', sans-serif", fontSize: '11px', color: 'var(--static)' }}>intent</div>
-                    </div>
-                  )}
-                  <span style={{
-                    fontFamily: "'Martian Mono', monospace", fontSize: '10px',
-                    color: run.status === 'complete' ? 'var(--signal)' : 'var(--static)',
-                    border: `1px solid ${run.status === 'complete' ? 'var(--green-bd)' : 'var(--border)'}`,
-                    padding: '3px 10px',
-                  }}>{run.status}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
+      <PersonaRunsTable testId={testId} runs={runs} />
     </div>
   );
 }
