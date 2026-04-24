@@ -26,9 +26,12 @@ Return ONLY a valid JSON object with these keys (omit keys you cannot confidentl
 IMPORTANT: Return raw JSON only. No markdown code fences. No backticks. No \`\`\`json. Just the plain JSON object starting with { and ending with }.`;
 
 function parseJson(raw: string): Record<string, string> {
-  // Strip markdown code fences if present (```json ... ``` or ``` ... ```)
-  const stripped = raw.replace(/^```(?:json)?\s*/i, '').replace(/\s*```\s*$/, '').trim();
-  return JSON.parse(stripped);
+  // 1. Strip ALL markdown code fences (handles multi-line preamble too)
+  let s = raw.replace(/```(?:json)?/gi, '').trim();
+  // 2. Extract the first {...} block in case Claude adds prose around the JSON
+  const match = s.match(/\{[\s\S]*\}/);
+  if (!match) throw new Error(`No JSON object found in response. Raw: ${raw.slice(0, 200)}`);
+  return JSON.parse(match[0]);
 }
 
 export async function POST(req: NextRequest) {

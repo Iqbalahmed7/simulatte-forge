@@ -104,8 +104,16 @@ export default function NewTestButton() {
   async function openModal() {
     setOpen(true);
     setParseState('idle');
+    setParseError('');
     setFilledFields(new Set());
     setMissingFields(new Set());
+    setError('');
+    setLoading(false);
+    setForm({
+      name: '', product_name: '', brand_name: '', tagline: '',
+      description: '', format: '', price_point: '', target_consumer: '',
+      key_benefits: '', category: '', market: 'UK', pool_id: '',
+    });
     try {
       const res = await fetch('/api/pools');
       if (res.ok) { const d = await res.json(); setPools(d.pools ?? []); }
@@ -194,8 +202,12 @@ export default function NewTestButton() {
       const data = await res.json();
       if (!res.ok) { setError(data.error ?? `Error ${res.status}`); return; }
       setOpen(false);
-      router.push(`/tests/${data.test?.id ?? ''}`);
-      router.refresh();
+      const testId = data.test?.id;
+      if (testId) {
+        router.push(`/tests/${testId}`);
+      } else {
+        router.refresh();
+      }
     } catch (err) {
       setError(String(err));
     } finally {
