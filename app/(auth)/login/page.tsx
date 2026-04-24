@@ -7,6 +7,8 @@ export default function LoginPage() {
   const router = useRouter();
   const [apiKey, setApiKey] = useState('');
   const [tenantId, setTenantId] = useState('');
+  const [adminSecret, setAdminSecret] = useState('');
+  const [showAdmin, setShowAdmin] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -18,14 +20,15 @@ export default function LoginPage() {
       const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ apiKey, tenantId }),
+        body: JSON.stringify({ apiKey, tenantId, ...(adminSecret ? { adminSecret } : {}) }),
       });
       if (!res.ok) {
         const d = await res.json();
         setError(d.error ?? 'Login failed');
         return;
       }
-      router.push('/tests');
+      const d = await res.json();
+      router.push(d.isAdmin ? '/admin' : '/tests');
       router.refresh();
     } catch {
       setError('Network error');
@@ -80,6 +83,34 @@ export default function LoginPage() {
               className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white/5 border text-white placeholder:text-white/20 outline-none focus:border-orange-500/50 transition-colors"
               style={{ borderColor: 'var(--border)' }}
             />
+          </div>
+
+          {/* Admin toggle */}
+          <div>
+            <button
+              type="button"
+              onClick={() => setShowAdmin(v => !v)}
+              style={{
+                fontFamily: "'Barlow', sans-serif", fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.12em', textTransform: 'uppercase',
+                color: 'var(--static)', background: 'none', border: 'none',
+                cursor: 'pointer', padding: 0,
+              }}
+            >
+              {showAdmin ? '− Admin access' : '+ Admin access'}
+            </button>
+            {showAdmin && (
+              <div className="mt-2">
+                <input
+                  type="password"
+                  value={adminSecret}
+                  onChange={e => setAdminSecret(e.target.value)}
+                  placeholder="Admin secret"
+                  className="w-full px-3.5 py-2.5 rounded-lg text-sm bg-white/5 border text-white placeholder:text-white/20 outline-none focus:border-orange-500/50 transition-colors"
+                  style={{ borderColor: 'var(--border)' }}
+                />
+              </div>
+            )}
           </div>
 
           {error && (

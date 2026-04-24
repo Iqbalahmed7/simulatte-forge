@@ -11,8 +11,9 @@ const getJwtSecret = () => {
 };
 
 export interface SessionPayload {
-  sub: string;       // user email
+  sub: string;       // user email / tenant id
   tenantId: string;
+  isAdmin?: boolean;
 }
 
 export async function createSession(payload: SessionPayload): Promise<string> {

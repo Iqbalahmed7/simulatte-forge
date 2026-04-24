@@ -3,6 +3,7 @@ import { forgeApi } from '@/lib/forge-api';
 import Link from 'next/link';
 import RunTestButton from '@/components/RunTestButton';
 import AskPersonaPanel from '@/components/AskPersonaPanel';
+import LiveTestPoller from '@/components/LiveTestPoller';
 
 const EYEBROW: React.CSSProperties = {
   fontFamily: "'Barlow', sans-serif",
@@ -92,6 +93,7 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
             <StatusTag status={test.status} />
+            <LiveTestPoller testId={testId} status={test.status} />
             {cc.market && (
               <span style={{
                 fontFamily: "'Martian Mono', monospace", fontSize: '10px',
@@ -178,6 +180,58 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
             {test.status === 'running' ? 'Simulation running — results will appear here shortly.' : 'No scorecard yet. Run the test to generate results.'}
           </p>
         </div>
+      )}
+
+      {/* Segment Heatmap */}
+      {scorecard?.segment_heatmap && Object.keys(scorecard.segment_heatmap).length > 0 && (
+        <section style={{ marginBottom: '48px' }}>
+          <p style={{ ...EYEBROW, marginBottom: '16px' }}>Segment Heatmap</p>
+          <div style={{ border: '1px solid var(--border)', background: 'var(--layer)' }}>
+            {/* column headers */}
+            {(() => {
+              const segments = scorecard.segment_heatmap as Record<string, Record<string, number>>;
+              const dims = Array.from(new Set(Object.values(segments).flatMap(d => Object.keys(d))));
+              return (
+                <>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: `180px repeat(${dims.length}, 1fr)`,
+                    padding: '8px 16px',
+                    borderBottom: '1px solid var(--border)',
+                    background: 'rgba(0,0,0,0.2)',
+                  }}>
+                    <span style={{ ...EYEBROW }}>Segment</span>
+                    {dims.map(d => <span key={d} style={{ ...EYEBROW, textAlign: 'center' }}>{d.replace(/_/g, ' ')}</span>)}
+                  </div>
+                  {Object.entries(segments).map(([seg, scores]) => (
+                    <div key={seg} style={{
+                      display: 'grid',
+                      gridTemplateColumns: `180px repeat(${dims.length}, 1fr)`,
+                      padding: '10px 16px',
+                      borderBottom: '1px solid var(--border)',
+                      alignItems: 'center',
+                    }}>
+                      <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: '13px', color: 'var(--parchment)', fontWeight: 500 }}>{seg}</span>
+                      {dims.map(d => {
+                        const v = scores[d] ?? 0;
+                        const pct = (v / 10) * 100;
+                        const heat = v >= 7 ? 'var(--signal)' : v >= 5 ? '#FFB84E' : '#FF6B6B';
+                        return (
+                          <div key={d} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
+                            <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '13px', color: heat }}>{v.toFixed(1)}</span>
+                            <div style={{ width: '80%', height: '2px', background: 'var(--border)' }}>
+                              <div style={{ height: '100%', width: `${pct}%`, background: heat }} />
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </>
+              );
+            })()}
+          </div>
+        </section>
       )}
 
       {/* Ask Persona */}

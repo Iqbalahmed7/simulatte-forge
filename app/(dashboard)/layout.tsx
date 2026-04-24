@@ -7,7 +7,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
   if (!session) redirect('/login');
   return (
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--background)' }}>
-      <NavBar tenantId={session.tenantId} />
+      <NavBar tenantId={session.tenantId} isAdmin={session.isAdmin} />
       <main className="flex-1 max-w-6xl w-full mx-auto px-6 py-8">{children}</main>
     </div>
   );

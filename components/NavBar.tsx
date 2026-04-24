@@ -21,7 +21,7 @@ function NavLink({ href, children }: { href: string; children: React.ReactNode }
   );
 }
 
-export default function NavBar({ tenantId }: { tenantId: string }) {
+export default function NavBar({ tenantId, isAdmin }: { tenantId: string; isAdmin?: boolean }) {
   const router = useRouter();
 
   async function signOut() {
@@ -55,6 +55,7 @@ export default function NavBar({ tenantId }: { tenantId: string }) {
         <nav style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
           <NavLink href="/tests">Tests</NavLink>
           <NavLink href="/pools">Pools</NavLink>
+          {isAdmin && <NavLink href="/admin">Admin</NavLink>}
         </nav>
       </div>
 
