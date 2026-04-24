@@ -139,12 +139,12 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
           )}
           <p style={{ ...EYEBROW, marginBottom: '16px' }}>Dimension Scores</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1px', background: 'var(--border)', marginBottom: '24px' }}>
-            <ScoreCard label="Purchase Intent" value={scorecard.purchase_intent_score} highlight />
+            <ScoreCard label="Purchase Intent" value={scorecard.intent_score} highlight />
             <ScoreCard label="Distinctiveness" value={scorecard.distinctiveness_score} />
-            <ScoreCard label="Believability" value={scorecard.believability_score} />
+            <ScoreCard label="Credibility" value={scorecard.credibility_score} />
             <ScoreCard label="Relevance" value={scorecard.relevance_score} />
-            <ScoreCard label="Value" value={scorecard.value_perception_score} />
-            <ScoreCard label="Trial Likelihood" value={scorecard.trial_likelihood} />
+            <ScoreCard label="Value" value={scorecard.value_score} />
+            <ScoreCard label="Appeal" value={scorecard.appeal_score} />
           </div>
 
           {scorecard.headline && (
@@ -157,11 +157,11 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
           )}
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))', gap: '1px', background: 'var(--border)' }}>
-            {scorecard.key_strengths?.length > 0 && (
+            {scorecard.top_strengths?.length > 0 && (
               <div style={{ background: 'var(--layer)', padding: '20px' }}>
                 <p style={{ ...EYEBROW, color: 'var(--signal)', marginBottom: '14px' }}>Strengths</p>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {scorecard.key_strengths.map((s: string, i: number) => (
+                  {scorecard.top_strengths.map((s: string, i: number) => (
                     <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
                       <span style={{ color: 'var(--signal)', flexShrink: 0, marginTop: '1px' }}>↑</span>{s}
                     </li>
@@ -169,11 +169,11 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
                 </ul>
               </div>
             )}
-            {scorecard.key_weaknesses?.length > 0 && (
+            {scorecard.top_risks?.length > 0 && (
               <div style={{ background: 'var(--layer)', padding: '20px' }}>
-                <p style={{ ...EYEBROW, marginBottom: '14px' }}>Weaknesses</p>
+                <p style={{ ...EYEBROW, marginBottom: '14px' }}>Risks</p>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {scorecard.key_weaknesses.map((w: string, i: number) => (
+                  {scorecard.top_risks.map((w: string, i: number) => (
                     <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
                       <span style={{ color: 'var(--static)', flexShrink: 0, marginTop: '1px' }}>↓</span>{w}
                     </li>
