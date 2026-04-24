@@ -116,7 +116,27 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
       {/* Scorecard */}
       {scorecard ? (
         <section style={{ marginBottom: '48px' }}>
-          <p style={{ ...EYEBROW, marginBottom: '16px' }}>Scorecard</p>
+          {/* Concept Score hero */}
+          {scorecard.concept_score != null && (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px', marginBottom: '24px' }}>
+              <span style={{
+                fontFamily: "'Barlow Condensed', sans-serif",
+                fontSize: 'clamp(56px,7vw,88px)', fontWeight: 800,
+                color: 'var(--signal)', lineHeight: 1,
+              }}>{Number(scorecard.concept_score).toFixed(1)}</span>
+              <span style={{ fontFamily: "'Barlow', sans-serif", fontSize: '13px', color: 'var(--static)', fontWeight: 500 }}>
+                / 10 &nbsp;·&nbsp; concept score
+              </span>
+              {scorecard.calibration_band && (
+                <span style={{
+                  fontFamily: "'Martian Mono', monospace", fontSize: '10px', fontWeight: 500,
+                  color: 'var(--parchment)', border: '1px solid var(--border-hi)',
+                  padding: '3px 10px', letterSpacing: '0.06em',
+                }}>{scorecard.calibration_band.toUpperCase()}</span>
+              )}
+            </div>
+          )}
+          <p style={{ ...EYEBROW, marginBottom: '16px' }}>Dimension Scores</p>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '1px', background: 'var(--border)', marginBottom: '24px' }}>
             <ScoreCard label="Purchase Intent" value={scorecard.purchase_intent_score} highlight />
             <ScoreCard label="Distinctiveness" value={scorecard.distinctiveness_score} />
@@ -215,7 +235,7 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
                       {dims.map(d => {
                         const v = scores[d] ?? 0;
                         const pct = (v / 10) * 100;
-                        const heat = v >= 7 ? 'var(--signal)' : v >= 5 ? '#FFB84E' : '#FF6B6B';
+                        const heat = v >= 7 ? 'var(--signal)' : v >= 5 ? 'var(--parchment)' : 'var(--static)';
                         return (
                           <div key={d} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
                             <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '13px', color: heat }}>{v.toFixed(1)}</span>
