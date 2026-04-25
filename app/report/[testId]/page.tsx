@@ -13,8 +13,8 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
 
   let test: any = null;
   let scorecard: any = null;
-  try { test = await forgeApi.getTest(testId) as any; } catch {}
-  try { scorecard = await forgeApi.getScorecard(testId) as any; } catch {}
+  try { const t = await forgeApi.getTest(testId) as any; test = t?.test ?? t; } catch {}
+  try { const s = await forgeApi.getScorecard(testId) as any; scorecard = s?.scorecard ?? s; } catch {}
 
   const cc = test?.concept_card ?? {};
   const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -177,6 +177,34 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
                   </ul>
                 </div>
               )}
+
+              {/* Segment Heatmap */}
+              {scorecard.segment_heatmap && Object.keys(scorecard.segment_heatmap).length > 0 && (
+                <div style={{ marginBottom: '32px' }}>
+                  <p className="eyebrow" style={{ marginBottom: '16px' }}>Segment Heatmap — % Positive Intent</p>
+                  {(Object.entries(scorecard.segment_heatmap) as [string, Record<string, number>][]).map(([dim, cells]) => (
+                    <div key={dim} style={{ marginBottom: '20px' }}>
+                      <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A9997', marginBottom: '10px' }}>
+                        {dim === 'sec' ? 'SEC' : dim === 'city_tier' ? 'City Tier' : dim.charAt(0).toUpperCase() + dim.slice(1)}
+                      </p>
+                      {Object.entries(cells).map(([label, pct]) => {
+                        const col = pct >= 65 ? '#A8FF3E' : pct >= 45 ? '#E9E6DF' : '#9A9997';
+                        return (
+                          <div key={label} className="bar-row">
+                            <span style={{ width: '100px', fontSize: '12px', color: '#9A9997', flexShrink: 0 }}>{label}</span>
+                            <div className="bar-track">
+                              <div className="bar-fill" style={{ width: `${pct}%`, background: col }} />
+                            </div>
+                            <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '12px', fontWeight: 500, color: col, width: '44px', textAlign: 'right', flexShrink: 0 }}>
+                              {pct.toFixed(0)}%
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ))}
+                </div>
+              )}
             </>
           )}
 
@@ -210,7 +238,7 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
         </div>
 
         {/* Print button (hidden in print) */}
-        <button className="print-btn" onClick={() => window.print()}>
+        <button className="print-btn">
           Print / Save as PDF
         </button>
         <script dangerouslySetInnerHTML={{ __html: `
