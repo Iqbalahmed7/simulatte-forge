@@ -72,14 +72,14 @@ export default async function TestsPage() {
           <NewTestButton />
         </div>
       ) : (
+        <style>{`.test-card:hover { background: var(--layer) !important; }`}</style>
         <div style={{ display: 'grid', gap: '1px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', background: 'var(--border)' }}>
           {tests.map((test: any) => (
             <Link
               key={test.id}
               href={`/tests/${test.id}`}
+              className="test-card"
               style={{ display: 'block', background: 'var(--void)', padding: '24px', textDecoration: 'none', transition: 'background 0.15s' }}
-              onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--layer)')}
-              onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'var(--void)')}
             >
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
                 <StatusTag status={test.status} />
