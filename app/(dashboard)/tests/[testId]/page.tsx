@@ -67,8 +67,8 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
   let scorecard: any = null;
   let runs: any[] = [];
 
-  try { test = await forgeApi.getTest(testId) as any; } catch {}
-  try { scorecard = await forgeApi.getScorecard(testId) as any; } catch {}
+  try { const t = await forgeApi.getTest(testId) as any; test = t?.test ?? t; } catch {}
+  try { const s = await forgeApi.getScorecard(testId) as any; scorecard = s?.scorecard ?? s; } catch {}
   try { const r = await forgeApi.listRuns(testId) as any; runs = r.runs ?? []; } catch {}
 
   if (!test) {
@@ -127,6 +127,32 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
             >
               ↓ Report
             </a>
+          )}
+          {scorecard && !test.variant_of && (
+            <Link
+              href={`/tests/${testId}/compare`}
+              style={{
+                fontFamily: "'Barlow', sans-serif", fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: 'var(--signal)', border: '1px solid var(--green-bd)',
+                padding: '6px 14px', textDecoration: 'none', display: 'inline-block',
+              }}
+            >
+              Compare →
+            </Link>
+          )}
+          {test.variant_of && (
+            <Link
+              href={`/tests/${test.variant_of}/compare`}
+              style={{
+                fontFamily: "'Barlow', sans-serif", fontSize: '11px', fontWeight: 600,
+                letterSpacing: '0.14em', textTransform: 'uppercase',
+                color: 'var(--signal)', border: '1px solid var(--green-bd)',
+                padding: '6px 14px', textDecoration: 'none', display: 'inline-block',
+              }}
+            >
+              ↖ Compare
+            </Link>
           )}
           <VariantButton testId={testId} conceptCard={cc} tenantId={test.tenant_id} />
           <RunTestButton testId={testId} />

@@ -44,6 +44,10 @@ export const forgeApi = {
     req(`/tests/${testId}/runs/${runId}`),
   getTrace: (testId: string, runId: string) =>
     req(`/tests/${testId}/runs/${runId}/trace`),
+  listVariants: (parentTestId: string, workspaceId: string) =>
+    req(`/tests?variant_of=${parentTestId}`, {
+      headers: { 'X-Workspace-Id': workspaceId },
+    }),
   createVariant: (testId: string, data: Record<string, unknown>) =>
     req(`/tests/${testId}/variant`, { method: 'POST', body: JSON.stringify(data) }),
   askPersona: (testId: string, data: Record<string, unknown>) =>
