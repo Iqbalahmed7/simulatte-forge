@@ -50,6 +50,25 @@ function MemoryBadge({ count }: { count: number }) {
   );
 }
 
+function GatesBadge({ gatesPassed }: { gatesPassed: string | null | undefined }) {
+  if (!gatesPassed) return null;
+  const allPassed = gatesPassed === '4/4';
+  return (
+    <span style={{
+      fontFamily: "'Martian Mono', monospace",
+      fontSize: '9px', fontWeight: 500,
+      letterSpacing: '0.06em',
+      color: allPassed ? 'var(--signal)' : 'var(--static)',
+      border: `1px solid ${allPassed ? 'var(--green-bd)' : 'var(--border)'}`,
+      background: allPassed ? 'var(--green-tint)' : 'transparent',
+      padding: '2px 8px',
+      display: 'inline-block',
+    }}>
+      QG·{gatesPassed}
+    </span>
+  );
+}
+
 function ScoreRow({
   label, parent, variants, hero = false,
 }: {
@@ -216,9 +235,10 @@ export default async function ComparePage({ params }: { params: Promise<{ testId
               <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '13px', color: 'var(--parchment)', fontWeight: 500 }}>
                 {parentTest.name}
               </p>
-              {parentScorecard?.method_cert?.hydration_event_count > 0 && (
-                <div style={{ marginTop: '6px' }}>
+              {(parentScorecard?.method_cert?.hydration_event_count > 0 || parentScorecard?.method_cert?.gates_passed) && (
+                <div style={{ marginTop: '6px', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                   <MemoryBadge count={parentScorecard.method_cert.hydration_event_count} />
+                  <GatesBadge gatesPassed={parentScorecard.method_cert.gates_passed} />
                 </div>
               )}
             </div>
@@ -236,9 +256,10 @@ export default async function ComparePage({ params }: { params: Promise<{ testId
                   color: v.status === 'complete' ? 'var(--signal)' : 'var(--static)',
                   marginTop: '4px',
                 }}>{v.status}</p>
-                {variantScorecards[i]?.method_cert?.hydration_event_count > 0 && (
-                  <div style={{ marginTop: '6px' }}>
+                {(variantScorecards[i]?.method_cert?.hydration_event_count > 0 || variantScorecards[i]?.method_cert?.gates_passed) && (
+                  <div style={{ marginTop: '6px', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                     <MemoryBadge count={variantScorecards[i].method_cert.hydration_event_count} />
+                    <GatesBadge gatesPassed={variantScorecards[i].method_cert.gates_passed} />
                   </div>
                 )}
               </div>
