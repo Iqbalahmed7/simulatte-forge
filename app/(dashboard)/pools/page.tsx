@@ -93,16 +93,14 @@ export default async function PoolsPage() {
               <span key={h} style={{ ...EYEBROW, fontSize: '10px' }}>{h}</span>
             ))}
           </div>
+          <style>{`.pool-row:hover { background: var(--layer) !important; }`}</style>
           {pools.map((pool: any) => (
-            <div key={pool.id} style={{
+            <div key={pool.id} className="pool-row" style={{
               background: 'var(--void)', padding: '16px 20px',
               display: 'grid', gridTemplateColumns: '1fr 120px 80px 100px 120px',
               gap: '16px', alignItems: 'center',
               transition: 'background 0.15s',
-            }}
-              onMouseEnter={e => ((e.currentTarget as HTMLElement).style.background = 'var(--layer)')}
-              onMouseLeave={e => ((e.currentTarget as HTMLElement).style.background = 'var(--void)')}
-            >
+            }}>
               <div>
                 <p style={{
                   fontFamily: "'Barlow', sans-serif", fontSize: '14px',
