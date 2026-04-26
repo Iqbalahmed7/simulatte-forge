@@ -207,11 +207,14 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
               <div style={{ background: 'var(--layer)', padding: '20px' }}>
                 <p style={{ ...EYEBROW, color: 'var(--signal)', marginBottom: '14px' }}>Strengths</p>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {scorecard.top_strengths.map((s: string, i: number) => (
-                    <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
-                      <span style={{ color: 'var(--signal)', flexShrink: 0, marginTop: '1px' }}>↑</span>{s}
-                    </li>
-                  ))}
+                  {scorecard.top_strengths.map((s: any, i: number) => {
+                    const label = typeof s === 'string' ? s : (s?.dimension ? `${String(s.dimension).replace(/_/g, ' ')}${typeof s?.score === 'number' ? ` — ${s.score.toFixed(1)}` : ''}` : JSON.stringify(s));
+                    return (
+                      <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
+                        <span style={{ color: 'var(--signal)', flexShrink: 0, marginTop: '1px' }}>↑</span>{label}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -219,11 +222,14 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
               <div style={{ background: 'var(--layer)', padding: '20px' }}>
                 <p style={{ ...EYEBROW, marginBottom: '14px' }}>Risks</p>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {scorecard.top_risks.map((w: string, i: number) => (
-                    <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
-                      <span style={{ color: 'var(--static)', flexShrink: 0, marginTop: '1px' }}>↓</span>{w}
-                    </li>
-                  ))}
+                  {scorecard.top_risks.map((w: any, i: number) => {
+                    const label = typeof w === 'string' ? w : (w?.dimension ? `${String(w.dimension).replace(/_/g, ' ')}${typeof w?.score === 'number' ? ` — ${w.score.toFixed(1)}` : ''}` : JSON.stringify(w));
+                    return (
+                      <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
+                        <span style={{ color: 'var(--static)', flexShrink: 0, marginTop: '1px' }}>↓</span>{label}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
@@ -231,11 +237,14 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
               <div style={{ background: 'var(--layer)', padding: '20px' }}>
                 <p style={{ ...EYEBROW, marginBottom: '14px' }}>Recommendations</p>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                  {scorecard.recommendations.map((r: string, i: number) => (
-                    <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
-                      <span style={{ color: 'var(--parchment)', flexShrink: 0, marginTop: '1px' }}>→</span>{r}
-                    </li>
-                  ))}
+                  {scorecard.recommendations.map((r: any, i: number) => {
+                    const label = typeof r === 'string' ? r : (r?.text || r?.dimension || JSON.stringify(r));
+                    return (
+                      <li key={i} style={{ display: 'flex', gap: '10px', fontFamily: "'Barlow', sans-serif", fontSize: '14px', color: 'rgba(233,230,223,0.88)', lineHeight: 1.5 }}>
+                        <span style={{ color: 'var(--parchment)', flexShrink: 0, marginTop: '1px' }}>→</span>{label}
+                      </li>
+                    );
+                  })}
                 </ul>
               </div>
             )}
