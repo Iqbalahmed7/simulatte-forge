@@ -26,7 +26,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const data = await forgeApi.createTest({ ...body, tenant_id: session.tenantId }) as any;
-    await forgeApi.runTest(data.test.id).catch(() => {});
+    try {
+      await forgeApi.runTest(data.test.id);
+    } catch (runErr) {
+      const msg = runErr instanceof ForgeAPIError ? runErr.message : String(runErr);
+      console.error('[POST /api/tests] runTest failed for', data.test.id, '—', msg);
+      return NextResponse.json({ ...data, run_error: msg }, { status: 201 });
+    }
     return NextResponse.json(data, { status: 201 });
   } catch (e) {
     if (e instanceof ForgeAPIError) return NextResponse.json({ error: e.message }, { status: e.status });
