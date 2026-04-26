@@ -250,13 +250,28 @@ export default async function TestDetailPage({ params }: { params: Promise<{ tes
       )}
 
       {/* Segment Heatmap */}
-      {scorecard?.segment_heatmap && Object.keys(scorecard.segment_heatmap).length > 0 && (
+      {scorecard?.segment_heatmap?.by_segment && Object.keys(scorecard.segment_heatmap.by_segment).length > 0 && (
         <section style={{ marginBottom: '48px' }}>
           <p style={{ ...EYEBROW, marginBottom: '16px' }}>Segment Heatmap</p>
           <div style={{ border: '1px solid var(--border)', background: 'var(--layer)' }}>
             {/* column headers */}
             {(() => {
-              const segments = scorecard.segment_heatmap as Record<string, Record<string, number>>;
+              const bySeg = scorecard.segment_heatmap.by_segment as Record<string, { kpi_means?: Record<string, number>; concept_score?: number; n?: number }>;
+              // Flatten each segment's kpi_means into a flat {dim: number} map
+              const segments: Record<string, Record<string, number>> = Object.fromEntries(
+                Object.entries(bySeg).map(([seg, payload]) => {
+                  const flat: Record<string, number> = {};
+                  if (payload && typeof payload === 'object') {
+                    if (payload.kpi_means && typeof payload.kpi_means === 'object') {
+                      for (const [k, v] of Object.entries(payload.kpi_means)) {
+                        if (typeof v === 'number') flat[k] = v;
+                      }
+                    }
+                    if (typeof payload.concept_score === 'number') flat['concept_score'] = payload.concept_score;
+                  }
+                  return [seg, flat];
+                })
+              );
               const dims = Array.from(new Set(Object.values(segments).flatMap(d => Object.keys(d))));
               return (
                 <>
