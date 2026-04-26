@@ -81,6 +81,7 @@ export default async function TenantsPage() {
           ))}
         </div>
 
+        <style>{`.admin-tenant-row:hover { background: rgba(255,255,255,0.02); }`}</style>
         {tenants.length === 0 ? (
           <div style={{ padding: '48px 20px', textAlign: 'center' }}>
             <p style={{ fontFamily: "'Barlow', sans-serif", color: 'var(--static)', fontSize: '14px' }}>
@@ -88,15 +89,13 @@ export default async function TenantsPage() {
             </p>
           </div>
         ) : tenants.map((t: any) => (
-          <div key={t.id} style={{
+          <div key={t.id} className="admin-tenant-row" style={{
             display: 'grid',
             gridTemplateColumns: '1fr 100px 90px 100px 100px 100px 80px',
             padding: '16px 20px',
             borderBottom: '1px solid var(--border)',
             alignItems: 'center',
           }}
-            onMouseEnter={e => (e.currentTarget.style.background = 'rgba(255,255,255,0.02)')}
-            onMouseLeave={e => (e.currentTarget.style.background = 'transparent')}
           >
             <div>
               <p style={{ fontFamily: "'Barlow', sans-serif", fontWeight: 600, fontSize: '14px', color: 'var(--parchment)', marginBottom: '2px' }}>

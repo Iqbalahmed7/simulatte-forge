@@ -72,6 +72,7 @@ export default async function TestsPage() {
           <NewTestButton />
         </div>
       ) : (
+        <>
         <style>{`.test-card:hover { background: var(--layer) !important; }`}</style>
         <div style={{ display: 'grid', gap: '1px', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', background: 'var(--border)' }}>
           {tests.map((test: any) => (
@@ -124,6 +125,7 @@ export default async function TestsPage() {
             </Link>
           ))}
         </div>
+        </>
       )}
     </div>
   );
