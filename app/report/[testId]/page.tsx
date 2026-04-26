@@ -19,14 +19,15 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
   const cc = test?.concept_card ?? {};
   const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
 
+  // Doc 09 aligned dimension display names (internal DB keys unchanged)
   const DIMS = [
     { label: 'Purchase Intent', key: 'intent_score' },
-    { label: 'Distinctiveness',  key: 'distinctiveness_score' },
-    { label: 'Credibility',      key: 'credibility_score' },
-    { label: 'Relevance',        key: 'relevance_score' },
-    { label: 'Value',            key: 'value_score' },
-    { label: 'Appeal',           key: 'appeal_score' },
-    { label: 'Clarity',          key: 'clarity_score' },
+    { label: 'Uniqueness',      key: 'distinctiveness_score' },
+    { label: 'Believability',   key: 'credibility_score' },
+    { label: 'Relevance',       key: 'relevance_score' },
+    { label: 'Price Fit',       key: 'value_score' },
+    { label: 'Appeal',          key: 'appeal_score' },
+    { label: 'Message Clarity', key: 'clarity_score' },
   ];
 
   return (
@@ -147,9 +148,10 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
                     <div className="col-cell">
                       <p className="eyebrow" style={{ color: '#A8FF3E', marginBottom: '14px' }}>Strengths</p>
                       <ul className="list">
-                        {scorecard.top_strengths.map((s: any, i: number) => (
-                          <li key={i}><span style={{ color: '#A8FF3E', flexShrink: 0 }}>↑</span>{s.dimension} — {s.score}/10</li>
-                        ))}
+                        {scorecard.top_strengths.map((s: any, i: number) => {
+                          const label = typeof s === 'string' ? s : (s?.dimension ? `${String(s.dimension).replace(/_/g,' ')}${typeof s?.score === 'number' ? ` — ${s.score.toFixed(1)}/10` : ''}` : JSON.stringify(s));
+                          return <li key={i}><span style={{ color: '#A8FF3E', flexShrink: 0 }}>↑</span>{label}</li>;
+                        })}
                       </ul>
                     </div>
                   )}
@@ -157,9 +159,10 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
                     <div className="col-cell">
                       <p className="eyebrow" style={{ marginBottom: '14px' }}>Risks</p>
                       <ul className="list">
-                        {scorecard.top_risks.map((r: any, i: number) => (
-                          <li key={i}><span style={{ color: '#9A9997', flexShrink: 0 }}>↓</span>{r.dimension} — {r.score}/10</li>
-                        ))}
+                        {scorecard.top_risks.map((r: any, i: number) => {
+                          const label = typeof r === 'string' ? r : (r?.dimension ? `${String(r.dimension).replace(/_/g,' ')}${typeof r?.score === 'number' ? ` — ${r.score.toFixed(1)}/10` : ''}` : JSON.stringify(r));
+                          return <li key={i}><span style={{ color: '#9A9997', flexShrink: 0 }}>↓</span>{label}</li>;
+                        })}
                       </ul>
                     </div>
                   )}
@@ -171,20 +174,72 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
                 <div style={{ marginBottom: '32px' }}>
                   <p className="eyebrow" style={{ marginBottom: '14px' }}>Recommendations</p>
                   <ul className="list">
-                    {scorecard.recommendations.map((r: string, i: number) => (
-                      <li key={i}><span style={{ color: '#E9E6DF', flexShrink: 0 }}>→</span>{r}</li>
-                    ))}
+                    {scorecard.recommendations.map((r: any, i: number) => {
+                      const label = typeof r === 'string' ? r : (r?.text || r?.dimension || JSON.stringify(r));
+                      return <li key={i}><span style={{ color: '#E9E6DF', flexShrink: 0 }}>→</span>{label}</li>;
+                    })}
                   </ul>
                 </div>
               )}
 
-              {/* Segment Heatmap */}
-              {scorecard.segment_heatmap && Object.keys(scorecard.segment_heatmap).length > 0 && (
+              {/* Segment Analysis */}
+              {scorecard.segment_heatmap && (
                 <div style={{ marginBottom: '32px' }}>
-                  <p className="eyebrow" style={{ marginBottom: '16px' }}>Segment Heatmap — % Positive Intent</p>
-                  {(Object.entries(scorecard.segment_heatmap) as [string, Record<string, number>][]).map(([dim, cells]) => (
+                  <p className="eyebrow" style={{ marginBottom: '16px' }}>Segment Analysis — % Positive Intent</p>
+
+                  {/* SEC × City Tier subsegment grid (N≥15 cells only) */}
+                  {scorecard.segment_heatmap.by_subsegment && Object.keys(scorecard.segment_heatmap.by_subsegment).length > 0 && (() => {
+                    const SECS   = ['SEC-A', 'SEC-B', 'SEC-C'];
+                    const TIERS  = ['T1', 'T2', 'T3', 'Rural'];
+                    const cells  = scorecard.segment_heatmap.by_subsegment as Record<string, any>;
+                    return (
+                      <div style={{ marginBottom: '24px' }}>
+                        <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A9997', marginBottom: '10px' }}>SEC × City Tier</p>
+                        {/* Header row */}
+                        <div style={{ display: 'grid', gridTemplateColumns: '72px repeat(4, 1fr)', gap: '1px', background: 'rgba(233,230,223,0.08)', marginBottom: '1px' }}>
+                          <div style={{ background: '#050505', padding: '8px' }} />
+                          {TIERS.map(t => (
+                            <div key={t} style={{ background: '#050505', padding: '8px' }}>
+                              <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '9px', fontWeight: 500, color: '#9A9997' }}>{t}</span>
+                            </div>
+                          ))}
+                        </div>
+                        {/* Data rows */}
+                        {SECS.map(sec => (
+                          <div key={sec} style={{ display: 'grid', gridTemplateColumns: '72px repeat(4, 1fr)', gap: '1px', background: 'rgba(233,230,223,0.08)', marginBottom: '1px' }}>
+                            <div style={{ background: '#050505', padding: '8px', display: 'flex', alignItems: 'center' }}>
+                              <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '9px', fontWeight: 500, color: '#9A9997' }}>{sec.replace('SEC-', '')}</span>
+                            </div>
+                            {TIERS.map(tier => {
+                              const key  = `sec:${sec}__city_tier:${tier}`;
+                              const cell = cells[key];
+                              if (!cell) {
+                                return (
+                                  <div key={tier} style={{ background: '#050505', padding: '8px' }}>
+                                    <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '9px', color: 'rgba(233,230,223,0.24)' }}>n/a</span>
+                                  </div>
+                                );
+                              }
+                              const t2b = typeof cell.t2b_pct === 'number' ? cell.t2b_pct : null;
+                              const col = t2b == null ? '#9A9997' : t2b >= 65 ? '#A8FF3E' : t2b >= 45 ? '#E9E6DF' : '#9A9997';
+                              return (
+                                <div key={tier} style={{ background: '#050505', padding: '8px' }}>
+                                  <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '12px', fontWeight: 500, color: col, display: 'block' }}>{t2b == null ? '—' : `${t2b.toFixed(0)}%`}</span>
+                                  <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '9px', color: 'rgba(233,230,223,0.40)' }}>n={cell.n}</span>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ))}
+                        <p style={{ fontSize: '11px', color: 'rgba(233,230,223,0.40)', marginTop: '6px' }}>n/a = fewer than 15 responses in cell</p>
+                      </div>
+                    );
+                  })()}
+
+                  {/* Per-segment bar charts — sourced from p1_rates sub-key */}
+                  {scorecard.segment_heatmap.p1_rates && (Object.entries(scorecard.segment_heatmap.p1_rates) as [string, Record<string, number>][]).map(([dim, cells]) => (
                     <div key={dim} style={{ marginBottom: '20px' }}>
-                      <p style={{ fontFamily: "'Barlow', sans-serif", fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9A9997', marginBottom: '10px' }}>
+                      <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A9997', marginBottom: '10px' }}>
                         {dim === 'sec' ? 'SEC' : dim === 'city_tier' ? 'City Tier' : dim.charAt(0).toUpperCase() + dim.slice(1)}
                       </p>
                       {Object.entries(cells).map(([label, pct]) => {
@@ -195,7 +250,7 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
                             <div className="bar-track">
                               <div className="bar-fill" style={{ width: `${pct}%`, background: col }} />
                             </div>
-                            <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '12px', fontWeight: 500, color: col, width: '44px', textAlign: 'right', flexShrink: 0 }}>
+                            <span style={{ fontFamily: "'Martian Mono', monospace", fontSize: '12px', fontWeight: 500, color: col, width: '44px', textAlign: 'right' as const, flexShrink: 0 }}>
                               {pct.toFixed(0)}%
                             </span>
                           </div>
@@ -203,6 +258,18 @@ export default async function ReportPage({ params }: { params: Promise<{ testId:
                       })}
                     </div>
                   ))}
+
+                  {/* Dissent signals — stored in method_cert.dissent_signals */}
+                  {scorecard.method_cert?.dissent_signals?.length > 0 && (
+                    <div style={{ marginTop: '16px', padding: '12px', border: '1px solid rgba(233,230,223,0.08)' }}>
+                      <p style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: '#9A9997', marginBottom: '6px' }}>
+                        Dissent Signals — {scorecard.method_cert.dissent_signals.length} persona{scorecard.method_cert.dissent_signals.length !== 1 ? 's' : ''}
+                      </p>
+                      <p style={{ fontSize: '12px', color: 'rgba(233,230,223,0.56)', lineHeight: 1.55 }}>
+                        {scorecard.method_cert.dissent_signals.length} response pattern{scorecard.method_cert.dissent_signals.length !== 1 ? 's' : ''} flagged as statistically extreme (&gt;2.5 SD on 3+ dimensions). Retained in scoring as authentic dissent signal{scorecard.method_cert.dissent_signals.length !== 1 ? 's' : ''}.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </>
