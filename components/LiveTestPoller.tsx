@@ -20,8 +20,11 @@ export default function LiveTestPoller({ testId, status }: { testId: string; sta
         const res = await fetch(`/api/tests/${testId}`, { cache: 'no-store' });
         if (!res.ok) return;
         const data = await res.json();
-        router.refresh();
-        if (data?.status !== 'running') clearInterval(id);
+        const currentStatus = data?.test?.status ?? data?.status;
+        if (currentStatus !== 'running') {
+          clearInterval(id);
+          router.refresh();
+        }
       } catch { /* ignore */ }
     }, 4000);
 
