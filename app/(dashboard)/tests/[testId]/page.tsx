@@ -59,16 +59,8 @@ function StatusTag({ status }: { status: string }) {
   );
 }
 
-export default async function TestDetailPage({
-  params,
-  searchParams,
-}: {
-  params: Promise<{ testId: string }>;
-  searchParams?: Promise<Record<string, string | string[] | undefined>>;
-}) {
+export default async function TestDetailPage({ params }: { params: Promise<{ testId: string }> }) {
   const { testId } = await params;
-  const sp = searchParams ? await searchParams : {};
-  const warnSimStart = sp['warn'] === 'sim_start_failed';
   await getSession();
 
   let test: any = null;
@@ -98,18 +90,6 @@ export default async function TestDetailPage({
         color: 'var(--static)', textDecoration: 'none', display: 'inline-block', marginBottom: '24px',
       }}>← All Tests</Link>
 
-      {/* Simulation start warning */}
-      {warnSimStart && (
-        <div style={{
-          marginBottom: '20px', padding: '12px 16px',
-          border: '1px solid rgba(255,180,60,0.3)',
-          background: 'rgba(255,180,60,0.06)',
-          fontFamily: "'Barlow', sans-serif", fontSize: '13px',
-          color: 'rgba(233,230,223,0.80)',
-        }}>
-          Test created but simulation failed to start. Use the <strong>Run</strong> button below to retry.
-        </div>
-      )}
 
       {/* Header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '40px', paddingBottom: '24px', borderBottom: '1px solid var(--border)' }}>

@@ -204,11 +204,7 @@ export default function NewTestButton() {
       setOpen(false);
       const testId = data.test?.id;
       if (testId) {
-        // run_error means test was created but simulation failed to start (stays draft)
-        const dest = data.run_error
-          ? `/tests/${testId}?warn=sim_start_failed`
-          : `/tests/${testId}`;
-        router.push(dest);
+        router.push(`/tests/${testId}`);
       } else {
         router.refresh();
       }
